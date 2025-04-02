@@ -159,38 +159,7 @@
               <th>Link</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><input type="checkbox" value="720000" name="comparativo" /></td>
-              <td>80</td>
-              <td>R$ 720.000</td>
-              <td><a href="#" target="_blank">Ver anúncio</a></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" value="680000" name="comparativo" /></td>
-              <td>78</td>
-              <td>R$ 680.000</td>
-              <td><a href="#" target="_blank">Ver anúncio</a></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" value="750000" name="comparativo" /></td>
-              <td>82</td>
-              <td>R$ 750.000</td>
-              <td><a href="#" target="_blank">Ver anúncio</a></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" value="700000" name="comparativo" /></td>
-              <td>79</td>
-              <td>R$ 700.000</td>
-              <td><a href="#" target="_blank">Ver anúncio</a></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" value="735000" name="comparativo" /></td>
-              <td>81</td>
-              <td>R$ 735.000</td>
-              <td><a href="#" target="_blank">Ver anúncio</a></td>
-            </tr>
-          </tbody>
+          <tbody id="corpo-imoveis"></tbody>
         </table>
         <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
       </form>
@@ -202,11 +171,13 @@
     const form = document.getElementById("formImovel");
     const resultadoBox = document.getElementById("resultado");
     const comparativosBox = document.getElementById("comparativos");
+    const corpoTabela = document.getElementById("corpo-imoveis");
 
     form.onsubmit = async (e) => {
       e.preventDefault();
       resultadoBox.innerHTML = "Analisando com IA... ⏳";
       comparativosBox.style.display = "none";
+      corpoTabela.innerHTML = "";
 
       const prompt = `
         Avalie um imóvel com os seguintes dados:
@@ -229,14 +200,40 @@
         });
 
         const result = await response.json();
-
         const texto = result.choices?.[0]?.message?.content;
         if (texto) {
           resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
-          comparativosBox.style.display = "block";
         } else {
           resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
         }
+
+        // BUSCA AUTOMÁTICA DE IMÓVEIS SEMELHANTES
+        const buscaResponse = await fetch("/api/buscarImoveis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endereco: document.getElementById("endereco").value,
+            area: document.getElementById("area").value,
+            quartos: document.getElementById("quartos").value,
+            banheiros: document.getElementById("banheiros").value,
+            vagas: document.getElementById("vagas").value,
+            estado: document.getElementById("estado").value,
+            tipo: document.getElementById("tipo").value,
+          }),
+        });
+
+        const imoveis = await buscaResponse.json();
+        imoveis.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><input type="checkbox" name="comparativo" value="${item.valor}"></td>
+            <td>${item.area}</td>
+            <td>R$ ${parseInt(item.valor).toLocaleString('pt-BR')}</td>
+            <td><a href="${item.link}" target="_blank">Ver anúncio</a></td>
+          `;
+          corpoTabela.appendChild(row);
+        });
+        comparativosBox.style.display = "block";
       } catch (err) {
         resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
       }
