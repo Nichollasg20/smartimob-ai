@@ -1,4 +1,4 @@
-// Arquivo: /api/buscarlimoveis.js
+// /api/buscarImoveis.js
 
 export default async function handler(req, res) {
   const { endereco, tipo, area, quartos, banheiros, vagas } = req.body;
@@ -16,16 +16,20 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!data.items) {
-      return res.status(200).json({ links: [] });
+      return res.status(200).json([]);
     }
 
-    const links = data.items.map(item => ({
-      title: item.title,
-      link: item.link
-    }));
+    // Transformando links em formato com valor e área simulados
+    const links = data.items.slice(0, 5).map((item, index) => {
+      return {
+        area: 75 + index * 2, // Simulação
+        valor: 700000 + index * 10000, // Simulação
+        link: item.link
+      };
+    });
 
-    return res.status(200).json({ links });
+    return res.status(200).json(links);
   } catch (error) {
     return res.status(500).json({ error: "Erro ao buscar imóveis." });
   }
-}
+} 
