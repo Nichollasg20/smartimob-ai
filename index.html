@@ -2,175 +2,130 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartImob.AI - Soluções Inteligentes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🏡 Avaliador de Imóveis com IA</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       margin: 0;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    header {
-      background-color: #1a1a1a;
-      color: white;
       padding: 20px;
-      text-align: center;
     }
     .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: white;
+      max-width: 600px;
+      background: #fff;
+      margin: auto;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
     }
     h2 {
       color: #c59d5f;
+      margin-bottom: 20px;
     }
-    textarea, input, select, button {
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, select, textarea, button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin-top: 5px;
-      margin-bottom: 15px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
+      box-sizing: border-box;
     }
     button {
       background-color: #c59d5f;
       color: white;
       border: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      font-weight: bold;
+      margin-top: 20px;
     }
-    button:hover {
-      background-color: #b38a4d;
-    }
-    .result {
-      background: #f1f1f1;
+    #resultado {
+      margin-top: 20px;
       padding: 15px;
-      border-left: 4px solid #c59d5f;
-      white-space: pre-wrap;
-      border-radius: 6px;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #777;
-      margin: 40px 0;
+      background: #f4f4f4;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>SmartImob.AI</h1>
-    <p>IA aplicada ao mercado imobiliário — avaliações e análise de leads em segundos</p>
-  </header>
-
   <div class="container">
-    <h2>🏠 Avaliador de Imóveis</h2>
+    <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
-      <label>Endereço completo:<input type="text" name="endereco" required></label>
-      <label>Área útil (m²):<input type="number" name="area" required></label>
-      <label>Quartos:<input type="number" name="quartos" required></label>
-      <label>Banheiros:<input type="number" name="banheiros" required></label>
-      <label>Vagas de garagem:<input type="number" name="vagas" required></label>
-      <label>Estado do imóvel:
-        <select name="estado">
-          <option value="Novo">Novo</option>
-          <option value="Usado">Usado</option>
-          <option value="Reformado">Reformado</option>
-        </select>
-      </label>
-      <label>Observações extras:<textarea name="obs" rows="3"></textarea></label>
+      <label>Endereço completo:</label>
+      <input type="text" id="endereco" required />
+
+      <label>Área útil (m²):</label>
+      <input type="number" id="area" required />
+
+      <label>Quartos:</label>
+      <input type="number" id="quartos" required />
+
+      <label>Banheiros:</label>
+      <input type="number" id="banheiros" required />
+
+      <label>Vagas de garagem:</label>
+      <input type="number" id="vagas" required />
+
+      <label>Estado do imóvel:</label>
+      <select id="estado">
+        <option>Novo</option>
+        <option>Usado</option>
+        <option>Reformado</option>
+      </select>
+
+      <label>Observações extras:</label>
+      <textarea id="observacoes"></textarea>
+
       <button type="submit">🔍 Avaliar Imóvel</button>
     </form>
-    <div id="resultadoImovel" class="result"></div>
-  </div>
 
-  <div class="container">
-    <h2>🤖 Análise de Leads com IA</h2>
-    <form id="formLead">
-      <label>Nome do cliente (opcional):<input type="text" name="nome"></label>
-      <label>Canal de atendimento:
-        <select name="canal">
-          <option value="WhatsApp">WhatsApp</option>
-          <option value="Ligação">Ligação</option>
-          <option value="Presencial">Presencial</option>
-        </select>
-      </label>
-      <label>Resumo do atendimento:<textarea name="resumo" rows="4" required></textarea></label>
-      <label>Resultado final:<input type="text" name="resultado" required></label>
-      <button type="submit">🔎 Analisar Lead</button>
-    </form>
-    <div id="resultadoLead" class="result"></div>
+    <div id="resultado"></div>
   </div>
-
-  <footer>
-    &copy; 2025 SmartImob.AI — Criado em menos de 24h com inteligência artificial 🚀
-  </footer>
 
   <script>
-    const formImovel = document.getElementById('formImovel');
-    const resultadoImovel = document.getElementById('resultadoImovel');
-    const formLead = document.getElementById('formLead');
-    const resultadoLead = document.getElementById('resultadoLead');
+    const form = document.getElementById("formImovel");
+    const resultadoBox = document.getElementById("resultado");
 
-    formImovel.onsubmit = async (e) => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      resultadoImovel.innerHTML = "Analisando com IA... ⏳";
-      const dados = Object.fromEntries(new FormData(formImovel).entries());
-      const prompt = `Você é um avaliador de imóveis. Avalie o imóvel com os seguintes dados:
-      - Endereço: ${dados.endereco}
-      - Área útil: ${dados.area} m²
-      - Quartos: ${dados.quartos}
-      - Banheiros: ${dados.banheiros}
-      - Vagas de garagem: ${dados.vagas}
-      - Estado do imóvel: ${dados.estado}
-      - Observações: ${dados.obs || "Nenhuma"}
 
-      Retorne:
-      1. Valor estimado de mercado (em R$)
-      2. Justificativa
-      3. Dica de precificação para o corretor`;
+      resultadoBox.innerHTML = "Analisando com IA... ⏳";
 
-      const response = await fetch("/api/avaliador", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await response.json();
-      resultadoImovel.innerHTML = data.choices[0].message.content;
-    };
+      const prompt = `
+        Avalie um imóvel com os seguintes dados:
+        Endereço: ${document.getElementById("endereco").value},
+        Área útil: ${document.getElementById("area").value} m²,
+        Quartos: ${document.getElementById("quartos").value},
+        Banheiros: ${document.getElementById("banheiros").value},
+        Vagas de garagem: ${document.getElementById("vagas").value},
+        Estado: ${document.getElementById("estado").value},
+        Observações: ${document.getElementById("observacoes").value}.
+        Forneça uma avaliação estimada e explique os motivos.
+      `;
 
-    formLead.onsubmit = async (e) => {
-      e.preventDefault();
-      resultadoLead.innerHTML = "Analisando lead... ⏳";
-      const dados = Object.fromEntries(new FormData(formLead).entries());
-      const prompt = `Você é um especialista em vendas imobiliárias. Um corretor atendeu um cliente com os seguintes dados:
-      - Nome do cliente: ${dados.nome || "Não informado"}
-      - Canal de atendimento: ${dados.canal}
-      - Resumo do atendimento: ${dados.resumo}
-      - Resultado final: ${dados.resultado}
+      try {
+        const response = await fetch("/api/avaliador", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+        });
 
-      Analise o caso e retorne:
-      📌 Motivo provável de não fechamento
-      🛠️ O que poderia ter sido feito diferente
-      🎯 Dica para leads semelhantes no futuro.`;
+        const result = await response.json();
 
-      const response = await fetch("/api/lead", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await response.json();
-      resultadoLead.innerHTML = data.choices[0].message.content;
+        if (result.error) {
+          resultadoBox.innerHTML = "❌ Erro: " + result.error;
+        } else {
+          const texto = result.choices?.[0]?.message?.content || "Erro: resposta vazia da IA.";
+          resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
+        }
+      } catch (err) {
+        resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
+      }
     };
   </script>
 </body>
 </html>
+
