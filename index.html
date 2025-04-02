@@ -1,131 +1,42 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🏡 Avaliador de Imóveis com IA</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f8f8;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 600px;
-      background: #fff;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
-    }
-    h2 {
-      color: #c59d5f;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #c59d5f;
-      color: white;
-      border: none;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f4f4f4;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>🏡 Avaliador de Imóveis com IA</h2>
-    <form id="formImovel">
-      <label>Endereço completo:</label>
-      <input type="text" id="endereco" required />
+<script>
+  const form = document.getElementById("formImovel");
+  const resultadoBox = document.getElementById("resultado");
 
-      <label>Área útil (m²):</label>
-      <input type="number" id="area" required />
+  form.onsubmit = async (e) => {
+    e.preventDefault();
 
-      <label>Quartos:</label>
-      <input type="number" id="quartos" required />
+    resultadoBox.innerHTML = "Analisando com IA... ⏳";
 
-      <label>Banheiros:</label>
-      <input type="number" id="banheiros" required />
+    const prompt = `
+      Avalie um imóvel com os seguintes dados:
+      Endereço: ${document.getElementById("endereco").value},
+      Área útil: ${document.getElementById("area").value} m²,
+      Quartos: ${document.getElementById("quartos").value},
+      Banheiros: ${document.getElementById("banheiros").value},
+      Vagas de garagem: ${document.getElementById("vagas").value},
+      Estado: ${document.getElementById("estado").value},
+      Observações: ${document.getElementById("observacoes").value}.
+      Forneça uma avaliação estimada e explique os motivos.
+    `;
 
-      <label>Vagas de garagem:</label>
-      <input type="number" id="vagas" required />
+    try {
+      const response = await fetch("/api/avaliador", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
 
-      <label>Estado do imóvel:</label>
-      <select id="estado">
-        <option>Novo</option>
-        <option>Usado</option>
-        <option>Reformado</option>
-      </select>
+      const result = await response.json();
 
-      <label>Observações extras:</label>
-      <textarea id="observacoes"></textarea>
-
-      <button type="submit">🔍 Avaliar Imóvel</button>
-    </form>
-
-    <div id="resultado"></div>
-  </div>
-
-  <script>
-    const form = document.getElementById("formImovel");
-    const resultadoBox = document.getElementById("resultado");
-
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-
-      resultadoBox.innerHTML = "Analisando com IA... ⏳";
-
-      const prompt = `
-        Avalie um imóvel com os seguintes dados:
-        Endereço: ${document.getElementById("endereco").value},
-        Área útil: ${document.getElementById("area").value} m²,
-        Quartos: ${document.getElementById("quartos").value},
-        Banheiros: ${document.getElementById("banheiros").value},
-        Vagas de garagem: ${document.getElementById("vagas").value},
-        Estado: ${document.getElementById("estado").value},
-        Observações: ${document.getElementById("observacoes").value}.
-        Forneça uma avaliação estimada e explique os motivos.
-      `;
-
-      try {
-        const response = await fetch("/api/avaliador", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
-        });
-
-        const result = await response.json();
-
-        if (result.error) {
-          resultadoBox.innerHTML = "❌ Erro: " + result.error;
-        } else {
-          const texto = result.choices?.[0]?.message?.content || "Erro: resposta vazia da IA.";
-          resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
-        }
-      } catch (err) {
-        resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
+      if (result.error) {
+        resultadoBox.innerHTML = "❌ Erro: " + result.error;
+      } else {
+        const texto = result.message || "Erro: resposta vazia da IA.";
+        resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
       }
-    };
-  </script>
-</body>
-</html>
+    } catch (err) {
+      resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
+    }
+  };
+</script>
 
