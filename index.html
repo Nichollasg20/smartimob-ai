@@ -57,32 +57,24 @@
     <form id="formImovel">
       <label>Endereço completo:</label>
       <input type="text" id="endereco" required />
-
       <label>Área útil (m²):</label>
       <input type="number" id="area" required />
-
       <label>Quartos:</label>
       <input type="number" id="quartos" required />
-
       <label>Banheiros:</label>
       <input type="number" id="banheiros" required />
-
       <label>Vagas de garagem:</label>
       <input type="number" id="vagas" required />
-
       <label>Estado do imóvel:</label>
       <select id="estado">
         <option>Novo</option>
         <option>Usado</option>
         <option>Reformado</option>
       </select>
-
       <label>Observações extras:</label>
       <textarea id="observacoes"></textarea>
-
       <button type="submit">🔍 Avaliar Imóvel</button>
     </form>
-
     <div class="resultado" id="resultadoAvaliacao"></div>
 
     <h2>🤖 Análise de Lead Perdido</h2>
@@ -94,11 +86,10 @@
       <textarea id="resumo" required></textarea>
 
       <label>Resultado (por que não fechou?):</label>
-      <textarea id="resultado" required></textarea>
+      <textarea id="motivo" required></textarea>
 
       <button type="submit">📈 Analisar Lead</button>
     </form>
-
     <div class="resultado" id="resultadoLead"></div>
   </div>
 
@@ -146,7 +137,7 @@
 
       const canal = document.getElementById("canal").value;
       const resumo = document.getElementById("resumo").value;
-      const resultado = document.getElementById("resultado").value;
+      const resultado = document.getElementById("motivo").value;
 
       try {
         const response = await fetch("/api/lead", {
