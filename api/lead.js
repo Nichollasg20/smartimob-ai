@@ -1,16 +1,6 @@
 export default async function handler(req, res) {
   try {
-    const { canal, resumo, resultado } = req.body;
-
-    const prompt = `
-      Você é um especialista em vendas de imóveis. Analise esse atendimento:
-
-      Canal: ${canal}
-      Resumo do atendimento: ${resumo}
-      Resultado: ${resultado}
-
-      Me diga por que o cliente não fechou, e como o corretor pode melhorar a abordagem nos próximos contatos.
-    `;
+    const { prompt } = req.body;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -27,12 +17,13 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      return res.status(response.status).json({ error: errorText });
+      return res.status(500).json({ error: "Erro ao chamar a OpenAI", details: errorText });
     }
 
     const data = await response.json();
-    res.status(200).json(data);
+    const message = data.choices[0].message.content;
+    res.status(200).json({ message });
   } catch (error) {
-    res.status(500).json({ error: error.message || "Erro interno no servidor" });
+    res.status(500).json({ error: "Erro interno no servidor", details: error.message });
   }
 }
