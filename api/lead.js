@@ -2,17 +2,17 @@ export default async function handler(req, res) {
   const { canal, resumo, resultado } = req.body;
 
   const prompt = `
-Você é um especialista em vendas de imóveis. Um corretor fez o seguinte atendimento:
+    Você é um especialista em vendas de imóveis. Um corretor fez o seguinte atendimento:
 
-Canal de atendimento: ${canal}
-Resumo do atendimento: ${resumo}
-Resultado: ${resultado}
+    Canal de atendimento: ${canal}
+    Resumo do atendimento: ${resumo}
+    Resultado: ${resultado}
 
-Analise o atendimento, identifique o que pode ter dado errado, e dê sugestões práticas e profissionais para um próximo contato com esse cliente ou com outros similares. Seja direto, respeitoso e objetivo.
-`;
+    Analise o atendimento, identifique o que pode ter dado errado e dê sugestões práticas e profissionais para um próximo contato com esse cliente.
+  `;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const resposta = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -25,14 +25,14 @@ Analise o atendimento, identifique o que pode ter dado errado, e dê sugestões 
       }),
     });
 
-    const data = await response.json();
+    const dados = await resposta.json();
 
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+    if (dados.error) {
+      return res.status(500).json({ error: dados.error.message });
     }
 
-    return res.status(200).json(data);
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao se conectar com a OpenAI." });
+    res.status(200).json(dados);
+  } catch (erro) {
+    res.status(500).json({ error: "Erro ao conectar com a IA." });
   }
 }
