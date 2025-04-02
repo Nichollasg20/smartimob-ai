@@ -1,22 +1,31 @@
-export default async function handler(req, res) {
-  const { endereco, area, quartos, banheiros, tipo } = req.body;
+// Arquivo: /api/buscarlimoveis.js
 
-  const searchQuery = `site:olx.com.br OR site:zapimoveis.com.br OR site:vivareal.com.br apartamento ${quartos} quartos ${banheiros} banheiros ${area}m² ${tipo} ${endereco}`;
+export default async function handler(req, res) {
+  const { endereco, tipo, area, quartos, banheiros, vagas } = req.body;
+
+  const query = `${tipo} ${quartos} quartos ${banheiros} banheiros ${vagas} garagem ${area}m² ${endereco}`;
+
+  const apiKey = process.env.GOOGLE_API_KEY;
+  const cx = process.env.GOOGLE_CX;
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CX}&q=${encodeURIComponent(searchQuery)}`
+      `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}`
     );
+
     const data = await response.json();
 
-    const resultados = (data.items || []).map(item => ({
+    if (!data.items) {
+      return res.status(200).json({ links: [] });
+    }
+
+    const links = data.items.map(item => ({
       title: item.title,
-      link: item.link,
-      snippet: item.snippet,
+      link: item.link
     }));
 
-    return res.status(200).json({ resultados });
+    return res.status(200).json({ links });
   } catch (error) {
-    return res.status(500).json({ error: 'Erro ao buscar imóveis semelhantes.' });
+    return res.status(500).json({ error: "Erro ao buscar imóveis." });
   }
 }
