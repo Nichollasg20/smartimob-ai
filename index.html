@@ -1,186 +1,62 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartImob.AI - Soluções Inteligentes</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    header {
-      background-color: #1a1a1a;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
-    }
-    h2 {
-      color: #c59d5f;
-    }
-    textarea, input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #c59d5f;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background-color: #b38a4d;
-    }
-    .result {
-      background: #f1f1f1;
-      padding: 15px;
-      border-left: 4px solid #c59d5f;
-      white-space: pre-wrap;
-      border-radius: 6px;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #777;
-      margin: 40px 0;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>SmartImob.AI</h1>
-    <p>IA aplicada ao mercado imobiliário — avaliações e análise de leads em segundos</p>
-  </header>
+<!-- Tudo igual ao anterior, só muda essas partes 👇 -->
+<script>
+  const formImovel = document.getElementById('formImovel');
+  const resultadoImovel = document.getElementById('resultadoImovel');
+  const formLead = document.getElementById('formLead');
+  const resultadoLead = document.getElementById('resultadoLead');
 
-  <div class="container">
-    <h2>🏠 Avaliador de Imóveis</h2>
-    <p>Preencha os dados do imóvel e receba uma avaliação inteligente com base em mercado.</p>
+  formImovel.onsubmit = async (e) => {
+    e.preventDefault();
+    resultadoImovel.innerHTML = "Analisando com IA... ⏳";
+    const dados = Object.fromEntries(new FormData(formImovel).entries());
+    const prompt = `Você é um avaliador de imóveis. Avalie o imóvel com os seguintes dados:
+    - Endereço: ${dados.endereco}
+    - Área útil: ${dados.area} m²
+    - Quartos: ${dados.quartos}
+    - Banheiros: ${dados.banheiros}
+    - Vagas de garagem: ${dados.vagas}
+    - Estado do imóvel: ${dados.estado}
+    - Observações: ${dados.obs || "Nenhuma"}
 
-    <form id="formImovel">
-      <label>Endereço completo:<input type="text" name="endereco" required></label>
-      <label>Área útil (m²):<input type="number" name="area" required></label>
-      <label>Quartos:<input type="number" name="quartos" required></label>
-      <label>Banheiros:<input type="number" name="banheiros" required></label>
-      <label>Vagas de garagem:<input type="number" name="vagas" required></label>
-      <label>Estado do imóvel:
-        <select name="estado">
-          <option value="Novo">Novo</option>
-          <option value="Usado">Usado</option>
-          <option value="Reformado">Reformado</option>
-        </select>
-      </label>
-      <label>Observações extras:<textarea name="obs" rows="3"></textarea></label>
-      <button type="submit">🔍 Avaliar Imóvel</button>
-    </form>
+    Retorne:
+    1. Valor estimado de mercado (em R$)
+    2. Justificativa
+    3. Dica de precificação para o corretor`;
 
-    <div id="resultadoImovel" class="result"></div>
-  </div>
+    const response = await fetch("/api/avaliador.js", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await response.json();
+    resultadoImovel.innerHTML = data.choices[0].message.content;
+  };
 
-  <div class="container">
-    <h2>🤖 Análise de Leads com IA</h2>
-    <p>Entenda por que o cliente não fechou e como melhorar sua abordagem.</p>
+  formLead.onsubmit = async (e) => {
+    e.preventDefault();
+    resultadoLead.innerHTML = "Analisando lead... ⏳";
+    const dados = Object.fromEntries(new FormData(formLead).entries());
+    const prompt = `Você é um especialista em vendas imobiliárias. Um corretor atendeu um cliente com os seguintes dados:
+    - Nome do cliente: ${dados.nome || "Não informado"}
+    - Canal de atendimento: ${dados.canal}
+    - Resumo do atendimento: ${dados.resumo}
+    - Resultado final: ${dados.resultado}
 
-    <form id="formLead">
-      <label>Nome do cliente (opcional):<input type="text" name="nome"></label>
-      <label>Canal de atendimento:
-        <select name="canal">
-          <option value="WhatsApp">WhatsApp</option>
-          <option value="Ligação">Ligação</option>
-          <option value="Presencial">Presencial</option>
-        </select>
-      </label>
-      <label>Resumo do atendimento:<textarea name="resumo" rows="4" required></textarea></label>
-      <label>Resultado final:<input type="text" name="resultado" required></label>
-      <button type="submit">🔎 Analisar Lead</button>
-    </form>
+    Analise o caso e retorne:
+    📌 Motivo provável de não fechamento
+    🛠️ O que poderia ter sido feito diferente
+    🎯 Dica para leads semelhantes no futuro.`;
 
-    <div id="resultadoLead" class="result"></div>
-  </div>
-
-  <footer>
-    &copy; 2025 SmartImob.AI — Criado em menos de 24h com inteligência artificial 🚀
-  </footer>
-
-  <script>
-    const formImovel = document.getElementById('formImovel');
-    const resultadoImovel = document.getElementById('resultadoImovel');
-    const formLead = document.getElementById('formLead');
-    const resultadoLead = document.getElementById('resultadoLead');
-
-    formImovel.onsubmit = async (e) => {
-      e.preventDefault();
-      resultadoImovel.innerHTML = "Analisando com IA... ⏳";
-      const dados = Object.fromEntries(new FormData(formImovel).entries());
-      const prompt = `Você é um avaliador de imóveis. Avalie o imóvel com os seguintes dados:
-      - Endereço: ${dados.endereco}
-      - Área útil: ${dados.area} m²
-      - Quartos: ${dados.quartos}
-      - Banheiros: ${dados.banheiros}
-      - Vagas de garagem: ${dados.vagas}
-      - Estado do imóvel: ${dados.estado}
-      - Observações: ${dados.obs || "Nenhuma"}
-
-      Retorne:
-      1. Valor estimado de mercado (em R$)
-      2. Justificativa
-      3. Dica de precificação para o corretor`;
-
-      const response = await fetch("/api/avaliador", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await response.json();
-      resultadoImovel.innerHTML = data.choices[0].message.content;
-    };
-
-    formLead.onsubmit = async (e) => {
-      e.preventDefault();
-      resultadoLead.innerHTML = "Analisando lead... ⏳";
-      const dados = Object.fromEntries(new FormData(formLead).entries());
-      const prompt = `Você é um especialista em vendas imobiliárias. Um corretor atendeu um cliente com os seguintes dados:
-      - Nome do cliente: ${dados.nome || "Não informado"}
-      - Canal de atendimento: ${dados.canal}
-      - Resumo do atendimento: ${dados.resumo}
-      - Resultado final: ${dados.resultado}
-
-      Analise o caso e retorne:
-      📌 Motivo provável de não fechamento
-      🛠️ O que poderia ter sido feito diferente
-      🎯 Dica para leads semelhantes no futuro.`;
-
-      const response = await fetch("/api/lead", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await response.json();
-      resultadoLead.innerHTML = data.choices[0].message.content;
-    };
-  </script>
-</body>
-</html>
+    const response = await fetch("/api/lead.js", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await response.json();
+    resultadoLead.innerHTML = data.choices[0].message.content;
+  };
+</script>
