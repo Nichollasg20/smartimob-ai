@@ -84,10 +84,10 @@
   <div class="container">
     <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
-      <label for="endereco">Endereço completo:</label>
+      <label>Endereço completo:</label>
       <input type="text" id="endereco" required />
 
-      <label for="tipo">Tipo de Imóvel:</label>
+      <label>Tipo de Imóvel:</label>
       <select id="tipo" required>
         <option>Selecione uma opção</option>
         <optgroup label="Apartamentos">
@@ -120,26 +120,26 @@
         </optgroup>
       </select>
 
-      <label for="area">Área útil (m²):</label>
+      <label>Área útil (m²):</label>
       <input type="number" id="area" required />
 
-      <label for="quartos">Quartos:</label>
+      <label>Quartos:</label>
       <input type="number" id="quartos" required />
 
-      <label for="banheiros">Banheiros:</label>
+      <label>Banheiros:</label>
       <input type="number" id="banheiros" required />
 
-      <label for="vagas">Vagas de garagem:</label>
+      <label>Vagas de garagem:</label>
       <input type="number" id="vagas" required />
 
-      <label for="estado">Estado do imóvel:</label>
+      <label>Estado do imóvel:</label>
       <select id="estado">
         <option>Novo</option>
         <option>Usado</option>
         <option>Reformado</option>
       </select>
 
-      <label for="observacoes">Observações extras:</label>
+      <label>Observações extras:</label>
       <textarea id="observacoes"></textarea>
 
       <button type="submit">🔍 Avaliar Imóvel</button>
@@ -150,7 +150,7 @@
     <div id="comparativos">
       <h3>🔎 Imóveis semelhantes</h3>
       <form id="comparativoForm">
-        <table>
+        <table id="tabelaImoveis">
           <thead>
             <tr>
               <th></th>
@@ -159,7 +159,7 @@
               <th>Link</th>
             </tr>
           </thead>
-          <tbody id="corpo-imoveis"></tbody>
+          <tbody></tbody>
         </table>
         <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
       </form>
@@ -171,69 +171,62 @@
     const form = document.getElementById("formImovel");
     const resultadoBox = document.getElementById("resultado");
     const comparativosBox = document.getElementById("comparativos");
-    const corpoTabela = document.getElementById("corpo-imoveis");
+    const tabelaBody = document.querySelector("#tabelaImoveis tbody");
 
     form.onsubmit = async (e) => {
       e.preventDefault();
       resultadoBox.innerHTML = "Analisando com IA... ⏳";
       comparativosBox.style.display = "none";
-      corpoTabela.innerHTML = "";
+      tabelaBody.innerHTML = "";
 
-      const prompt = `
-        Avalie um imóvel com os seguintes dados:
-        Endereço: ${document.getElementById("endereco").value},
-        Tipo de imóvel: ${document.getElementById("tipo").value},
-        Área útil: ${document.getElementById("area").value} m²,
-        Quartos: ${document.getElementById("quartos").value},
-        Banheiros: ${document.getElementById("banheiros").value},
-        Vagas de garagem: ${document.getElementById("vagas").value},
-        Estado: ${document.getElementById("estado").value},
-        Observações: ${document.getElementById("observacoes").value}.
-        Forneça uma avaliação estimada e explique os motivos.
-      `;
+      const endereco = document.getElementById("endereco").value;
+      const tipo = document.getElementById("tipo").value;
+      const area = document.getElementById("area").value;
+      const quartos = document.getElementById("quartos").value;
+      const banheiros = document.getElementById("banheiros").value;
+      const vagas = document.getElementById("vagas").value;
+      const estado = document.getElementById("estado").value;
+      const observacoes = document.getElementById("observacoes").value;
+
+      const prompt = `Avalie um imóvel com os seguintes dados:\nEndereço: ${endereco}\nTipo de imóvel: ${tipo}\nÁrea: ${area}m²\nQuartos: ${quartos}\nBanheiros: ${banheiros}\nVagas: ${vagas}\nEstado: ${estado}\nObservações: ${observacoes}`;
 
       try {
-        const response = await fetch("/api/avaliador", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
-        });
+        const [resIA, resLinks] = await Promise.all([
+          fetch("/api/avaliador", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          }),
+          fetch("/api/buscarImoveis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ endereco, tipo, area, quartos, banheiros, vagas }),
+          }),
+        ]);
 
-        const result = await response.json();
-        const texto = result.choices?.[0]?.message?.content;
+        const iaData = await resIA.json();
+        const linksData = await resLinks.json();
+
+        const texto = iaData.choices?.[0]?.message?.content;
         if (texto) {
           resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
         } else {
           resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
         }
 
-        // BUSCA AUTOMÁTICA DE IMÓVEIS SEMELHANTES
-        const buscaResponse = await fetch("/api/buscarImoveis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            endereco: document.getElementById("endereco").value,
-            area: document.getElementById("area").value,
-            quartos: document.getElementById("quartos").value,
-            banheiros: document.getElementById("banheiros").value,
-            vagas: document.getElementById("vagas").value,
-            estado: document.getElementById("estado").value,
-            tipo: document.getElementById("tipo").value,
-          }),
-        });
-
-        const imoveis = await buscaResponse.json();
-        imoveis.forEach((item) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><input type="checkbox" name="comparativo" value="${item.valor}"></td>
-            <td>${item.area}</td>
-            <td>R$ ${parseInt(item.valor).toLocaleString('pt-BR')}</td>
-            <td><a href="${item.link}" target="_blank">Ver anúncio</a></td>
-          `;
-          corpoTabela.appendChild(row);
-        });
-        comparativosBox.style.display = "block";
+        if (linksData?.resultados?.length > 0) {
+          linksData.resultados.forEach((item, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td><input type="checkbox" name="comparativo" value="${item.valor}" /></td>
+              <td>${item.area}</td>
+              <td>R$ ${Number(item.valor).toLocaleString("pt-BR")}</td>
+              <td><a href="${item.link}" target="_blank">Ver anúcio</a></td>
+            `;
+            tabelaBody.appendChild(row);
+          });
+          comparativosBox.style.display = "block";
+        }
       } catch (err) {
         resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
       }
