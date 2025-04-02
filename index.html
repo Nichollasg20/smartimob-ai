@@ -135,7 +135,7 @@
       2. Justificativa
       3. Dica de precificação para o corretor`;
 
-      const response = await fetch("/api/avaliador.js", {
+      const response = await fetch("/api/avaliador", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -161,7 +161,7 @@
       🛠️ O que poderia ter sido feito diferente
       🎯 Dica para leads semelhantes no futuro.`;
 
-      const response = await fetch("/api/lead.js", {
+      const response = await fetch("/api/lead", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -174,4 +174,3 @@
   </script>
 </body>
 </html>
-
