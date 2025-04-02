@@ -1,35 +1,40 @@
 // /api/buscarImoveis.js
-
 export default async function handler(req, res) {
   const { endereco, tipo, area, quartos, banheiros, vagas } = req.body;
 
-  const query = `${tipo} ${quartos} quartos ${banheiros} banheiros ${vagas} garagem ${area}m² ${endereco}`;
-
-  const apiKey = process.env.GOOGLE_API_KEY;
-  const cx = process.env.GOOGLE_CX;
+  const query = `imóvel ${tipo} ${quartos} quartos ${banheiros} banheiros ${vagas} vagas ${area}m² ${endereco}`;
 
   try {
-    const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}`
+    const resposta = await fetch(
+      `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CX}&q=${encodeURIComponent(query)}`
     );
 
-    const data = await response.json();
+    const resultado = await resposta.json();
 
-    if (!data.items) {
+    if (!resultado.items) {
       return res.status(200).json([]);
     }
 
-    // Transformando links em formato com valor e área simulados
-    const links = data.items.slice(0, 5).map((item, index) => {
+    const imoveis = resultado.items.slice(0, 10).map((item) => {
+      const link = item.link;
+      const titulo = item.title;
+
+      // Tenta extrair valor e metragem do título (ex: "Apartamento 80m2 R$ 450.000")
+      const areaMatch = titulo.match(/(\d{2,3})\s?m²?/i);
+      const valorMatch = titulo.match(/R\$\s?(\d{2,3}[\.\d]*)/i);
+
+      const area = areaMatch ? parseInt(areaMatch[1]) : undefined;
+      const valor = valorMatch ? parseInt(valorMatch[1].replace(/\./g, "")) : undefined;
+
       return {
-        area: 75 + index * 2, // Simulação
-        valor: 700000 + index * 10000, // Simulação
-        link: item.link
+        area,
+        valor,
+        link,
       };
     });
 
-    return res.status(200).json(links);
+    res.status(200).json(imoveis);
   } catch (error) {
-    return res.status(500).json({ error: "Erro ao buscar imóveis." });
+    res.status(500).json({ erro: "Erro ao buscar imóveis: " + error.message });
   }
-} 
+}
