@@ -3,93 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🏡 Avaliador de Imóveis - House55</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>🏡 Avaliador de Imóveis com IA</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f4f4f4;
-      color: #333;
-    }
-    header {
-      background-color: #fff;
-      padding: 20px 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header h1 {
-      font-size: 22px;
-      color: #c59d5f;
-      margin: 0;
+      padding: 20px;
     }
     .container {
-      max-width: 700px;
+      max-width: 600px;
       background: #fff;
-      margin: 40px auto;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
     }
     h2 {
       color: #c59d5f;
-      font-size: 20px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
     label {
       display: block;
-      margin-top: 20px;
-      font-weight: 600;
+      margin-top: 15px;
     }
-    input, select, textarea {
+    input, select, textarea, button {
       width: 100%;
-      padding: 12px;
-      margin-top: 6px;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
       box-sizing: border-box;
-    }
-    textarea {
-      resize: vertical;
     }
     button {
       background-color: #c59d5f;
       color: white;
-      padding: 14px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
       font-weight: bold;
-      margin-top: 30px;
-      cursor: pointer;
-      width: 100%;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #b18a4f;
+      margin-top: 20px;
     }
     #resultado {
-      margin-top: 30px;
-      background: #f9f9f9;
-      padding: 20px;
-      border-left: 5px solid #c59d5f;
-      border-radius: 8px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f4f4f4;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🏡 House55 | Avaliador de Imóveis com IA</h1>
-  </header>
   <div class="container">
-    <h2>Preencha os dados do imóvel</h2>
+    <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
       <label>Endereço completo:</label>
       <input type="text" id="endereco" required />
+
+      <label>Tipo de Imóvel:</label>
+      <select id="tipo" required>
+        <option>Selecione uma opção</option>
+        <optgroup label="Apartamentos">
+          <option>Apartamento</option>
+          <option>Flat</option>
+          <option>Cobertura</option>
+          <option>Kitinet</option>
+          <option>Loft</option>
+          <option>Studio</option>
+        </optgroup>
+        <optgroup label="Residencias">
+          <option>Casa de Condomínio</option>
+          <option>Casa Residencial</option>
+          <option>Sobrado</option>
+        </optgroup>
+        <optgroup label="Rural">
+          <option>Chácara</option>
+        </optgroup>
+        <optgroup label="Lotes e Terrenos">
+          <option>Terreno</option>
+        </optgroup>
+        <optgroup label="Comercial">
+          <option>Loja</option>
+          <option>Prédio Comercial</option>
+          <option>Residência Comercial</option>
+          <option>Sala Comercial</option>
+        </optgroup>
+        <optgroup label="Industrial">
+          <option>Galpão</option>
+        </optgroup>
+      </select>
 
       <label>Área útil (m²):</label>
       <input type="number" id="area" required />
@@ -130,6 +129,7 @@
       const prompt = `
         Avalie um imóvel com os seguintes dados:
         Endereço: ${document.getElementById("endereco").value},
+        Tipo de imóvel: ${document.getElementById("tipo").value},
         Área útil: ${document.getElementById("area").value} m²,
         Quartos: ${document.getElementById("quartos").value},
         Banheiros: ${document.getElementById("banheiros").value},
