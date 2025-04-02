@@ -62,15 +62,21 @@
       font-size: 15px;
       white-space: pre-wrap;
     }
-    .imovel-item {
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      background: #fff;
+    #comparativos {
+      display: none;
     }
-    .imovel-item input {
-      margin-right: 10px;
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #eee;
     }
   </style>
 </head>
@@ -142,28 +148,50 @@
     <div id="resultado"></div>
 
     <div id="comparativos">
-      <h3>🔎 Imóveis semelhantes encontrados</h3>
+      <h3>🔎 Imóveis semelhantes</h3>
       <form id="comparativoForm">
-        <div class="imovel-item">
-          <input type="checkbox" value="720000" name="comparativo" />
-          Apto 80m² - R$ 720.000 - Rua das Palmeiras, Batel
-        </div>
-        <div class="imovel-item">
-          <input type="checkbox" value="680000" name="comparativo" />
-          Apto 78m² - R$ 680.000 - Av. República Argentina, Água Verde
-        </div>
-        <div class="imovel-item">
-          <input type="checkbox" value="750000" name="comparativo" />
-          Apto 82m² - R$ 750.000 - Rua XV de Novembro, Centro
-        </div>
-        <div class="imovel-item">
-          <input type="checkbox" value="700000" name="comparativo" />
-          Apto 79m² - R$ 700.000 - Rua Alferes Poli, Rebouças
-        </div>
-        <div class="imovel-item">
-          <input type="checkbox" value="735000" name="comparativo" />
-          Apto 81m² - R$ 735.000 - Rua Brasílio Itiberê, Água Verde
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Área (m²)</th>
+              <th>Valor (R$)</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" value="720000" name="comparativo" /></td>
+              <td>80</td>
+              <td>R$ 720.000</td>
+              <td><a href="#" target="_blank">Ver anúncio</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="680000" name="comparativo" /></td>
+              <td>78</td>
+              <td>R$ 680.000</td>
+              <td><a href="#" target="_blank">Ver anúncio</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="750000" name="comparativo" /></td>
+              <td>82</td>
+              <td>R$ 750.000</td>
+              <td><a href="#" target="_blank">Ver anúncio</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="700000" name="comparativo" /></td>
+              <td>79</td>
+              <td>R$ 700.000</td>
+              <td><a href="#" target="_blank">Ver anúncio</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="735000" name="comparativo" /></td>
+              <td>81</td>
+              <td>R$ 735.000</td>
+              <td><a href="#" target="_blank">Ver anúncio</a></td>
+            </tr>
+          </tbody>
+        </table>
         <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
       </form>
       <div id="mediaCalculada" style="margin-top: 20px; font-weight: bold;"></div>
@@ -173,10 +201,12 @@
   <script>
     const form = document.getElementById("formImovel");
     const resultadoBox = document.getElementById("resultado");
+    const comparativosBox = document.getElementById("comparativos");
 
     form.onsubmit = async (e) => {
       e.preventDefault();
       resultadoBox.innerHTML = "Analisando com IA... ⏳";
+      comparativosBox.style.display = "none";
 
       const prompt = `
         Avalie um imóvel com os seguintes dados:
@@ -203,6 +233,7 @@
         const texto = result.choices?.[0]?.message?.content;
         if (texto) {
           resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
+          comparativosBox.style.display = "block";
         } else {
           resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
         }
