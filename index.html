@@ -3,44 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartImob.AI</title>
+  <title>🏡 Avaliador de Imóveis com IA</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 30px;
+      background: #f8f8f8;
+      margin: 0;
+      padding: 20px;
     }
     .container {
-      max-width: 700px;
+      max-width: 600px;
+      background: #fff;
       margin: auto;
-      background: white;
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: 0 0 10px #ccc;
+    }
+    h2 {
+      color: #c59d5f;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
     }
     input, select, textarea, button {
       width: 100%;
-      margin-top: 8px;
       padding: 10px;
-      border-radius: 6px;
+      margin-top: 5px;
+      border-radius: 5px;
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
     button {
-      background: #c59d5f;
+      background-color: #c59d5f;
       color: white;
-      font-weight: bold;
       border: none;
+      font-weight: bold;
       margin-top: 20px;
     }
-    h2 {
-      color: #c59d5f;
-    }
-    #resultado, #leadResultado {
+    #resultado {
       margin-top: 20px;
-      padding: 20px;
-      background: #eee;
-      border-radius: 8px;
+      padding: 15px;
+      background: #f4f4f4;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -49,106 +55,74 @@
     <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
       <label>Endereço completo:</label>
-      <input id="endereco" required />
+      <input type="text" id="endereco" required />
+
       <label>Área útil (m²):</label>
       <input type="number" id="area" required />
+
       <label>Quartos:</label>
       <input type="number" id="quartos" required />
+
       <label>Banheiros:</label>
       <input type="number" id="banheiros" required />
+
       <label>Vagas de garagem:</label>
       <input type="number" id="vagas" required />
+
       <label>Estado do imóvel:</label>
       <select id="estado">
         <option>Novo</option>
         <option>Usado</option>
         <option>Reformado</option>
       </select>
+
       <label>Observações extras:</label>
       <textarea id="observacoes"></textarea>
+
       <button type="submit">🔍 Avaliar Imóvel</button>
     </form>
+
     <div id="resultado"></div>
-
-    <hr><br>
-
-    <h2>🤖 Análise de Lead Perdido</h2>
-    <form id="formLead">
-      <label>Canal de Atendimento:</label>
-      <input id="canal" placeholder="whatsapp, ligação..." required />
-      <label>Resumo do Atendimento:</label>
-      <textarea id="resumo" required></textarea>
-      <label>Resultado (por que não fechou?):</label>
-      <textarea id="resultadoLead" required></textarea>
-      <button type="submit">☑️ Analisar Lead</button>
-    </form>
-    <div id="leadResultado"></div>
   </div>
 
   <script>
-    const formImovel = document.getElementById("formImovel");
-    const resultado = document.getElementById("resultado");
+    const form = document.getElementById("formImovel");
+    const resultadoBox = document.getElementById("resultado");
 
-    formImovel.onsubmit = async (e) => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      resultado.innerHTML = "Analisando com IA...";
+
+      resultadoBox.innerHTML = "Analisando com IA... ⏳";
 
       const prompt = `
         Avalie um imóvel com os seguintes dados:
-        Endereço: ${endereco.value},
-        Área útil: ${area.value} m²,
-        Quartos: ${quartos.value},
-        Banheiros: ${banheiros.value},
-        Vagas: ${vagas.value},
-        Estado: ${estado.value},
-        Observações: ${observacoes.value}.
-        Forneça uma avaliação estimada e descrição detalhada.
+        Endereço: ${document.getElementById("endereco").value},
+        Área útil: ${document.getElementById("area").value} m²,
+        Quartos: ${document.getElementById("quartos").value},
+        Banheiros: ${document.getElementById("banheiros").value},
+        Vagas de garagem: ${document.getElementById("vagas").value},
+        Estado: ${document.getElementById("estado").value},
+        Observações: ${document.getElementById("observacoes").value}.
+        Forneça uma avaliação estimada e explique os motivos.
       `;
 
       try {
-        const res = await fetch("/api/avaliador", {
+        const response = await fetch("/api/avaliador", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt }),
         });
-        const data = await res.json();
 
-        if (data.error) {
-          resultado.innerHTML = "❌ Erro: " + data.error;
+        const result = await response.json();
+
+        if (result.error) {
+          resultadoBox.innerHTML = "❌ Erro: " + result.error;
         } else {
-          resultado.innerHTML = `<strong>📊 Avaliação:</strong><br><br>${data.choices?.[0]?.message?.content.replace(/\n/g, "<br>")}`;
+          const texto = result.choices?.[0]?.message?.content || "Erro: resposta vazia da IA.";
+          resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
         }
-      } catch {
-        resultado.innerHTML = "❌ Erro ao conectar com a IA.";
-      }
-    };
-
-    const formLead = document.getElementById("formLead");
-    const leadResultado = document.getElementById("leadResultado");
-
-    formLead.onsubmit = async (e) => {
-      e.preventDefault();
-      leadResultado.innerHTML = "Analisando lead...";
-
-      try {
-        const res = await fetch("/api/lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            canal: canal.value,
-            resumo: resumo.value,
-            resultado: resultadoLead.value,
-          }),
-        });
-
-        const data = await res.json();
-        if (data.error) {
-          leadResultado.innerHTML = "❌ Erro: " + data.error;
-        } else {
-          leadResultado.innerHTML = `<strong>📈 Análise:</strong><br><br>${data.choices?.[0]?.message?.content.replace(/\n/g, "<br>")}`;
-        }
-      } catch {
-        leadResultado.innerHTML = "❌ Erro ao conectar com a IA.";
+      } catch (err) {
+        resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
       }
     };
   </script>
