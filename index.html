@@ -3,50 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🏡 Avaliador de Imóveis com IA</title>
+  <title>SmartImob.AI - Avaliador de Imóveis</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f8f8f8;
+      background-color: #f1f1f1;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     .container {
-      max-width: 600px;
-      background: #fff;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
+      max-width: 700px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      padding: 40px;
     }
     h2 {
-      color: #c59d5f;
-      margin-bottom: 20px;
+      text-align: center;
+      color: #a97d36;
+      font-size: 28px;
+      margin-bottom: 30px;
     }
     label {
+      font-weight: bold;
+      margin-top: 20px;
       display: block;
-      margin-top: 15px;
     }
-    input, select, textarea, button {
+    input, select, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
+      padding: 12px;
+      margin-top: 8px;
       border: 1px solid #ccc;
+      border-radius: 8px;
       box-sizing: border-box;
     }
     button {
-      background-color: #c59d5f;
+      width: 100%;
+      padding: 15px;
+      background-color: #a97d36;
       color: white;
       border: none;
+      border-radius: 8px;
+      font-size: 16px;
       font-weight: bold;
-      margin-top: 20px;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #916b2e;
     }
     #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f4f4f4;
-      border-radius: 5px;
+      background-color: #f9f9f9;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 5px solid #c59d5f;
+      font-size: 15px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -54,10 +68,10 @@
   <div class="container">
     <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
-      <label>Endereço completo:</label>
+      <label for="endereco">Endereço completo:</label>
       <input type="text" id="endereco" required />
 
-      <label>Tipo de Imóvel:</label>
+      <label for="tipo">Tipo de Imóvel:</label>
       <select id="tipo" required>
         <option>Selecione uma opção</option>
         <optgroup label="Apartamentos">
@@ -90,26 +104,26 @@
         </optgroup>
       </select>
 
-      <label>Área útil (m²):</label>
+      <label for="area">Área útil (m²):</label>
       <input type="number" id="area" required />
 
-      <label>Quartos:</label>
+      <label for="quartos">Quartos:</label>
       <input type="number" id="quartos" required />
 
-      <label>Banheiros:</label>
+      <label for="banheiros">Banheiros:</label>
       <input type="number" id="banheiros" required />
 
-      <label>Vagas de garagem:</label>
+      <label for="vagas">Vagas de garagem:</label>
       <input type="number" id="vagas" required />
 
-      <label>Estado do imóvel:</label>
+      <label for="estado">Estado do imóvel:</label>
       <select id="estado">
         <option>Novo</option>
         <option>Usado</option>
         <option>Reformado</option>
       </select>
 
-      <label>Observações extras:</label>
+      <label for="observacoes">Observações extras:</label>
       <textarea id="observacoes"></textarea>
 
       <button type="submit">🔍 Avaliar Imóvel</button>
