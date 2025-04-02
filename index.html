@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🏡 Avaliador de Imóveis com IA</title>
+  <title>SmartImob.AI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 700px;
       background: #fff;
       margin: auto;
       padding: 30px;
@@ -21,7 +21,7 @@
     }
     h2 {
       color: #c59d5f;
-      margin-bottom: 20px;
+      margin-top: 40px;
     }
     label {
       display: block;
@@ -41,8 +41,9 @@
       border: none;
       font-weight: bold;
       margin-top: 20px;
+      cursor: pointer;
     }
-    #resultado {
+    .resultado {
       margin-top: 20px;
       padding: 15px;
       background: #f4f4f4;
@@ -82,27 +83,42 @@
       <button type="submit">🔍 Avaliar Imóvel</button>
     </form>
 
-    <div id="resultado"></div>
+    <div class="resultado" id="resultadoAvaliacao"></div>
+
+    <h2>🤖 Análise de Lead Perdido</h2>
+    <form id="formLead">
+      <label>Canal de Atendimento:</label>
+      <input type="text" id="canal" required />
+
+      <label>Resumo do Atendimento:</label>
+      <textarea id="resumo" required></textarea>
+
+      <label>Resultado (por que não fechou?):</label>
+      <textarea id="resultado" required></textarea>
+
+      <button type="submit">📈 Analisar Lead</button>
+    </form>
+
+    <div class="resultado" id="resultadoLead"></div>
   </div>
 
   <script>
-    const form = document.getElementById("formImovel");
-    const resultadoBox = document.getElementById("resultado");
+    // Avaliação de imóvel
+    const formImovel = document.getElementById("formImovel");
+    const resultadoAvaliacao = document.getElementById("resultadoAvaliacao");
 
-    form.onsubmit = async (e) => {
+    formImovel.onsubmit = async (e) => {
       e.preventDefault();
-      resultadoBox.innerHTML = "Analisando com IA... ⏳";
+      resultadoAvaliacao.innerHTML = "Analisando com IA... ⏳";
 
       const prompt = `
-        Avalie um imóvel com os seguintes dados:
         Endereço: ${document.getElementById("endereco").value},
         Área útil: ${document.getElementById("area").value} m²,
         Quartos: ${document.getElementById("quartos").value},
         Banheiros: ${document.getElementById("banheiros").value},
-        Vagas de garagem: ${document.getElementById("vagas").value},
+        Vagas: ${document.getElementById("vagas").value},
         Estado: ${document.getElementById("estado").value},
         Observações: ${document.getElementById("observacoes").value}.
-        Forneça uma avaliação estimada e explique os motivos.
       `;
 
       try {
@@ -113,18 +129,39 @@
         });
 
         const result = await response.json();
-
         const texto = result.choices?.[0]?.message?.content;
-        if (texto) {
-          resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
-        } else {
-          resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
-        }
-      } catch (err) {
-        resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
+        resultadoAvaliacao.innerHTML = texto ? `<strong>📊 Avaliação:</strong><br><br>${texto.replace(/\n/g, "<br>")}` : "❌ Resposta vazia.";
+      } catch {
+        resultadoAvaliacao.innerHTML = "❌ Erro ao conectar com a IA.";
+      }
+    };
+
+    // Análise de lead
+    const formLead = document.getElementById("formLead");
+    const resultadoLead = document.getElementById("resultadoLead");
+
+    formLead.onsubmit = async (e) => {
+      e.preventDefault();
+      resultadoLead.innerHTML = "Analisando lead... ⏳";
+
+      const canal = document.getElementById("canal").value;
+      const resumo = document.getElementById("resumo").value;
+      const resultado = document.getElementById("resultado").value;
+
+      try {
+        const response = await fetch("/api/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ canal, resumo, resultado }),
+        });
+
+        const data = await response.json();
+        const texto = data.choices?.[0]?.message?.content;
+        resultadoLead.innerHTML = texto ? `<strong>💡 Análise da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}` : "❌ Resposta vazia.";
+      } catch {
+        resultadoLead.innerHTML = "❌ Erro ao conectar com a IA.";
       }
     };
   </script>
 </body>
 </html>
-
