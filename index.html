@@ -84,10 +84,10 @@
   <div class="container">
     <h2>🏡 Avaliador de Imóveis com IA</h2>
     <form id="formImovel">
-      <label>Endereço completo:</label>
+      <label for="endereco">Endereço completo:</label>
       <input type="text" id="endereco" required />
 
-      <label>Tipo de Imóvel:</label>
+      <label for="tipo">Tipo de Imóvel:</label>
       <select id="tipo" required>
         <option>Selecione uma opção</option>
         <optgroup label="Apartamentos">
@@ -120,26 +120,26 @@
         </optgroup>
       </select>
 
-      <label>Área útil (m²):</label>
+      <label for="area">Área útil (m²):</label>
       <input type="number" id="area" required />
 
-      <label>Quartos:</label>
+      <label for="quartos">Quartos:</label>
       <input type="number" id="quartos" required />
 
-      <label>Banheiros:</label>
+      <label for="banheiros">Banheiros:</label>
       <input type="number" id="banheiros" required />
 
-      <label>Vagas de garagem:</label>
+      <label for="vagas">Vagas de garagem:</label>
       <input type="number" id="vagas" required />
 
-      <label>Estado do imóvel:</label>
+      <label for="estado">Estado do imóvel:</label>
       <select id="estado">
         <option>Novo</option>
         <option>Usado</option>
         <option>Reformado</option>
       </select>
 
-      <label>Observações extras:</label>
+      <label for="observacoes">Observações extras:</label>
       <textarea id="observacoes"></textarea>
 
       <button type="submit">🔍 Avaliar Imóvel</button>
@@ -150,7 +150,7 @@
     <div id="comparativos">
       <h3>🔎 Imóveis semelhantes</h3>
       <form id="comparativoForm">
-        <table id="tabelaImoveis">
+        <table>
           <thead>
             <tr>
               <th></th>
@@ -159,7 +159,7 @@
               <th>Link</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="listaComparativos"></tbody>
         </table>
         <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
       </form>
@@ -171,13 +171,12 @@
     const form = document.getElementById("formImovel");
     const resultadoBox = document.getElementById("resultado");
     const comparativosBox = document.getElementById("comparativos");
-    const tabelaBody = document.querySelector("#tabelaImoveis tbody");
+    const listaComparativos = document.getElementById("listaComparativos");
 
     form.onsubmit = async (e) => {
       e.preventDefault();
       resultadoBox.innerHTML = "Analisando com IA... ⏳";
       comparativosBox.style.display = "none";
-      tabelaBody.innerHTML = "";
 
       const endereco = document.getElementById("endereco").value;
       const tipo = document.getElementById("tipo").value;
@@ -188,49 +187,63 @@
       const estado = document.getElementById("estado").value;
       const observacoes = document.getElementById("observacoes").value;
 
-      const prompt = `Avalie um imóvel com os seguintes dados:\nEndereço: ${endereco}\nTipo de imóvel: ${tipo}\nÁrea: ${area}m²\nQuartos: ${quartos}\nBanheiros: ${banheiros}\nVagas: ${vagas}\nEstado: ${estado}\nObservações: ${observacoes}`;
+      const prompt = `
+        Avalie um imóvel com os seguintes dados:
+        Endereço: ${endereco},
+        Tipo de imóvel: ${tipo},
+        Área útil: ${area} m²,
+        Quartos: ${quartos},
+        Banheiros: ${banheiros},
+        Vagas de garagem: ${vagas},
+        Estado: ${estado},
+        Observações: ${observacoes}.
+        Forneça uma avaliação estimada e explique os motivos.
+      `;
 
       try {
-        const [resIA, resLinks] = await Promise.all([
-          fetch("/api/avaliador", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt }),
-          }),
-          fetch("/api/buscarImoveis", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ endereco, tipo, area, quartos, banheiros, vagas }),
-          }),
-        ]);
-
-        const iaData = await resIA.json();
-        const linksData = await resLinks.json();
-
-        const texto = iaData.choices?.[0]?.message?.content;
+        const response = await fetch("/api/avaliador", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+        });
+        const result = await response.json();
+        const texto = result.choices?.[0]?.message?.content;
         if (texto) {
           resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
+          buscarImoveisSemelhantes(`${tipo} ${endereco}`);
         } else {
           resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
-        }
-
-        if (linksData?.resultados?.length > 0) {
-          linksData.resultados.forEach((item, index) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td><input type="checkbox" name="comparativo" value="${item.valor}" /></td>
-              <td>${item.area}</td>
-              <td>R$ ${Number(item.valor).toLocaleString("pt-BR")}</td>
-              <td><a href="${item.link}" target="_blank">Ver anúcio</a></td>
-            `;
-            tabelaBody.appendChild(row);
-          });
-          comparativosBox.style.display = "block";
         }
       } catch (err) {
         resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
       }
     };
+
+    async function buscarImoveisSemelhantes(termo) {
+      try {
+        const res = await fetch("/api/buscarlimoveis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ termo }),
+        });
+        const data = await res.json();
+
+        listaComparativos.innerHTML = "";
+        data.forEach((item, index) => {
+          listaComparativos.innerHTML += `
+            <tr>
+              <td><input type="checkbox" name="comparativo" value="${item.valor}" /></td>
+              <td>${item.area}</td>
+              <td>R$ ${item.valor.toLocaleString('pt-BR')}</td>
+              <td><a href="${item.link}" target="_blank">Ver anúncio</a></td>
+            </tr>`;
+        });
+
+        comparativosBox.style.display = "block";
+      } catch (err) {
+        console.error("Erro ao buscar imóveis:", err);
+      }
+    }
 
     function calcularMedia() {
       const selecionados = document.querySelectorAll("input[name='comparativo']:checked");
