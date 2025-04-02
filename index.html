@@ -53,7 +53,7 @@
     button:hover {
       background-color: #916b2e;
     }
-    #resultado {
+    #resultado, #comparativos {
       background-color: #f9f9f9;
       margin-top: 30px;
       padding: 20px;
@@ -61,6 +61,16 @@
       border-left: 5px solid #c59d5f;
       font-size: 15px;
       white-space: pre-wrap;
+    }
+    .imovel-item {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .imovel-item input {
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -130,6 +140,34 @@
     </form>
 
     <div id="resultado"></div>
+
+    <div id="comparativos">
+      <h3>🔎 Imóveis semelhantes encontrados</h3>
+      <form id="comparativoForm">
+        <div class="imovel-item">
+          <input type="checkbox" value="720000" name="comparativo" />
+          Apto 80m² - R$ 720.000 - Rua das Palmeiras, Batel
+        </div>
+        <div class="imovel-item">
+          <input type="checkbox" value="680000" name="comparativo" />
+          Apto 78m² - R$ 680.000 - Av. República Argentina, Água Verde
+        </div>
+        <div class="imovel-item">
+          <input type="checkbox" value="750000" name="comparativo" />
+          Apto 82m² - R$ 750.000 - Rua XV de Novembro, Centro
+        </div>
+        <div class="imovel-item">
+          <input type="checkbox" value="700000" name="comparativo" />
+          Apto 79m² - R$ 700.000 - Rua Alferes Poli, Rebouças
+        </div>
+        <div class="imovel-item">
+          <input type="checkbox" value="735000" name="comparativo" />
+          Apto 81m² - R$ 735.000 - Rua Brasílio Itiberê, Água Verde
+        </div>
+        <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
+      </form>
+      <div id="mediaCalculada" style="margin-top: 20px; font-weight: bold;"></div>
+    </div>
   </div>
 
   <script>
@@ -172,6 +210,18 @@
         resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
       }
     };
+
+    function calcularMedia() {
+      const selecionados = document.querySelectorAll("input[name='comparativo']:checked");
+      if (selecionados.length === 0) {
+        document.getElementById("mediaCalculada").innerText = "Por favor, selecione pelo menos um imóvel.";
+        return;
+      }
+      let soma = 0;
+      selecionados.forEach(el => soma += parseInt(el.value));
+      const media = soma / selecionados.length;
+      document.getElementById("mediaCalculada").innerText = `⭐ Valor médio estimado com base na seleção: R$ ${media.toLocaleString('pt-BR')}`;
+    }
   </script>
 </body>
 </html>
