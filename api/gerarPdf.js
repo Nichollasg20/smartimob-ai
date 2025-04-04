@@ -1,44 +1,57 @@
-import PDFDocument from 'pdfkit';
-import { PassThrough } from 'stream';
+import PDFDocument from "pdfkit";
+import getStream from "get-stream";
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).end('Método não permitido');
+  if (req.method !== "POST") {
+    return res.status(405).end("Método não permitido");
   }
 
+  const { comprador, vendedor, endereco, valor, formaPagamento, observacoes } = req.body;
+
   try {
-    const { comprador, vendedor, endereco, valor, formaPagamento, observacoes } = req.body;
-
-    const doc = new PDFDocument();
-    const stream = new PassThrough();
-
-    res.setHeader('Content-Disposition', 'attachment; filename="proposta_house55.pdf"');
-    res.setHeader('Content-Type', 'application/pdf');
-
-    doc.pipe(stream);
-
-    doc.fontSize(18).fillColor('#000').text('📄 Proposta de Compra - House55', { align: 'center' });
+    const doc = new PDFDocument({ margin: 50 });
+    
+    // Cabeçalho
+    doc.fontSize(20).fillColor("#a97d36").text("Proposta de Compra - House55", { align: "center" });
     doc.moveDown();
 
-    doc.fontSize(12).text(`🧑 Comprador: ${comprador}`);
-    doc.text(`🏠 Vendedor: ${vendedor}`);
-    doc.text(`📍 Imóvel: ${endereco}`);
-    doc.text(`💰 Valor da proposta: R$ ${Number(valor).toLocaleString('pt-BR')}`);
-    doc.text(`💳 Forma de pagamento: ${formaPagamento}`);
-    if (observacoes && observacoes.trim() !== '') {
+    // Seções da proposta
+    doc
+      .fontSize(12)
+      .fillColor("#000")
+      .text(`📍 Imóvel: ${endereco}`, { align: "left" })
+      .moveDown(0.5)
+      .text(`🤝 Vendedor: ${vendedor}`)
+      .text(`🧑‍💼 Comprador: ${comprador}`)
+      .moveDown(0.5)
+      .text(`💰 Valor da Proposta: R$ ${Number(valor).toLocaleString("pt-BR")}`)
+      .text(`💳 Forma de Pagamento: ${formaPagamento}`)
+      .moveDown(0.5);
+
+    if (observacoes && observacoes.trim() !== "") {
       doc.text(`📝 Observações: ${observacoes}`);
     }
 
     doc.moveDown(2);
-    doc.text('_________________________', 100);
-    doc.text('Assinatura do Comprador', 100);
-    doc.text('_________________________', 350);
-    doc.text('Assinatura do Vendedor', 350);
+
+    // Assinaturas
+    doc.text("_____________________________", 70, doc.y);
+    doc.text("Assinatura do Vendedor", 70, doc.y + 15);
+
+    doc.text("_____________________________", 350, doc.y - 15);
+    doc.text("Assinatura do Comprador", 350, doc.y);
 
     doc.end();
-    stream.pipe(res);
-  } catch (err) {
-    console.error('Erro ao gerar o PDF:', err);
-    res.status(500).json({ error: 'Erro ao gerar o PDF' });
+
+    // Geração e envio do PDF
+    const buffer = await getStream.buffer(doc);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=proposta_house55.pdf");
+    res.send(buffer);
+
+  } catch (error) {
+    console.error("Erro ao gerar PDF:", error);
+    res.status(500).send("Erro ao gerar o PDF");
   }
 }
