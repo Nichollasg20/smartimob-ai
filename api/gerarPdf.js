@@ -1,38 +1,50 @@
-// /api/gerarPdf.js
+// ==== Arquivo: api/gerarPdf.js ====
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { comprador, vendedor, endereco, valor, pagamento, observacoes } = req.body;
+  const { imovel, comparativos } = req.body;
 
   const doc = new jsPDF();
-
   doc.setFontSize(18);
   doc.setTextColor(169, 125, 54);
-  doc.text("Proposta de Compra - House55", 105, 20, { align: "center" });
+  doc.text("Proposta de Compra - House55", 105, 15, { align: "center" });
 
   doc.setFontSize(12);
   doc.setTextColor(0);
-  doc.text(`Comprador: ${comprador}`, 20, 40);
-  doc.text(`Vendedor: ${vendedor}`, 20, 50);
-  doc.text(`Endereço do Imóvel: ${endereco}`, 20, 60);
-  doc.text(`Valor da Proposta: ${valor}`, 20, 70);
-  doc.text(`Forma de Pagamento: ${pagamento}`, 20, 80);
+  doc.text(`Endereço: ${imovel.endereco}`, 14, 30);
+  doc.text(`Tipo: ${imovel.tipo} | Estado: ${imovel.estado}`, 14, 38);
+  doc.text(`Área: ${imovel.area} m² | Quartos: ${imovel.quartos} | Banheiros: ${imovel.banheiros} | Vagas: ${imovel.vagas}`, 14, 46);
 
-  if (observacoes) {
-    doc.text("Observações:", 20, 90);
-    const lines = doc.splitTextToSize(observacoes, 170);
-    doc.text(lines, 20, 96);
+  if (imovel.observacoes) {
+    doc.setFontSize(11);
+    doc.text("Observações:", 14, 54);
+    doc.setFontSize(10);
+    doc.text(doc.splitTextToSize(imovel.observacoes, 180), 14, 60);
   }
 
-  // Espaço para assinatura
-  const y = observacoes ? 120 + doc.splitTextToSize(observacoes, 170).length * 6 : 110;
-  doc.text("____________________________________", 20, y + 30);
-  doc.text("Assinatura do Comprador", 20, y + 37);
+  const startY = imovel.observacoes ? 80 : 60;
 
-  doc.text("____________________________________", 120, y + 30);
-  doc.text("Assinatura do Vendedor", 120, y + 37);
+  autoTable(doc, {
+    startY,
+    head: [["#", "Área (m²)", "Valor (R$)", "R$/m²", "Link"]],
+    body: comparativos.map((c, i) => [
+      i + 1,
+      c.area,
+      `R$ ${c.valor.toLocaleString("pt-BR")}`,
+      `R$ ${(c.valor / c.area).toFixed(2)}`,
+      c.link
+    ]),
+    styles: { fontSize: 10, cellWidth: "wrap" },
+    columnStyles: { 4: { cellWidth: 70 } },
+  });
+
+  const media = comparativos.reduce((sum, c) => sum + c.valor, 0) / comparativos.length;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 102, 0);
+  doc.text(`Valor médio estimado: R$ ${media.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`, 14, doc.lastAutoTable.finalY + 10);
 
   const pdf = doc.output("arraybuffer");
   res.setHeader("Content-Type", "application/pdf");
