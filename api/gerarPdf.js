@@ -1,30 +1,25 @@
 import PDFDocument from 'pdfkit';
+import { PassThrough } from 'stream';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).end();
+    return res.status(405).end('Método não permitido');
   }
 
-  const { comprador, vendedor, endereco, valor, formaPagamento, observacoes } = req.body;
-
   try {
+    const { comprador, vendedor, endereco, valor, formaPagamento, observacoes } = req.body;
+
     const doc = new PDFDocument();
-    let buffers = [];
+    const stream = new PassThrough();
 
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {
-      const pdfData = Buffer.concat(buffers);
-      res.writeHead(200, {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="proposta_house55.pdf"',
-        'Content-Length': pdfData.length
-      });
-      res.end(pdfData);
-    });
+    res.setHeader('Content-Disposition', 'attachment; filename="proposta_house55.pdf"');
+    res.setHeader('Content-Type', 'application/pdf');
 
-    doc.fontSize(18).fillColor('#000').text('Proposta de Compra - House55', { align: 'center' });
+    doc.pipe(stream);
 
-    doc.moveDown(2);
+    doc.fontSize(18).fillColor('#000').text('📄 Proposta de Compra - House55', { align: 'center' });
+    doc.moveDown();
+
     doc.fontSize(12).text(`🧑 Comprador: ${comprador}`);
     doc.text(`🏠 Vendedor: ${vendedor}`);
     doc.text(`📍 Imóvel: ${endereco}`);
@@ -41,8 +36,9 @@ export default async function handler(req, res) {
     doc.text('Assinatura do Vendedor', 350);
 
     doc.end();
-  } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
-    res.status(500).json({ erro: 'Erro ao gerar PDF' });
+    stream.pipe(res);
+  } catch (err) {
+    console.error('Erro ao gerar o PDF:', err);
+    res.status(500).json({ error: 'Erro ao gerar o PDF' });
   }
 }
