@@ -1,51 +1,58 @@
-// ==== Arquivo: api/gerarPdf.js ====
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { imovel, comparativos } = req.body;
+  const { corretor, comprador, vendedor, imovel, valor, condicoes } = req.body;
 
   const doc = new jsPDF();
+  doc.setFont("helvetica", "normal");
+
+  // Título
   doc.setFontSize(18);
   doc.setTextColor(169, 125, 54);
-  doc.text("Proposta de Compra - House55", 105, 15, { align: "center" });
+  doc.text("Proposta de Compra - House55", 105, 20, { align: "center" });
 
+  // Dados principais
   doc.setFontSize(12);
-  doc.setTextColor(0);
-  doc.text(`Endereço: ${imovel.endereco}`, 14, 30);
-  doc.text(`Tipo: ${imovel.tipo} | Estado: ${imovel.estado}`, 14, 38);
-  doc.text(`Área: ${imovel.area} m² | Quartos: ${imovel.quartos} | Banheiros: ${imovel.banheiros} | Vagas: ${imovel.vagas}`, 14, 46);
+  doc.setTextColor(0, 0, 0);
+  let y = 35;
 
-  if (imovel.observacoes) {
-    doc.setFontSize(11);
-    doc.text("Observações:", 14, 54);
-    doc.setFontSize(10);
-    doc.text(doc.splitTextToSize(imovel.observacoes, 180), 14, 60);
-  }
+  doc.text(`Corretor: ${corretor}`, 20, y);
+  y += 10;
+  doc.text(`Comprador: ${comprador}`, 20, y);
+  y += 10;
+  doc.text(`Vendedor: ${vendedor}`, 20, y);
+  y += 15;
 
-  const startY = imovel.observacoes ? 80 : 60;
+  doc.setFont(undefined, "bold");
+  doc.text("Descrição do Imóvel:", 20, y);
+  doc.setFont(undefined, "normal");
+  y += 8;
+  const imovelLines = doc.splitTextToSize(imovel, 170);
+  doc.text(imovelLines, 20, y);
+  y += imovelLines.length * 7;
 
-  autoTable(doc, {
-    startY,
-    head: [["#", "Área (m²)", "Valor (R$)", "R$/m²", "Link"]],
-    body: comparativos.map((c, i) => [
-      i + 1,
-      c.area,
-      `R$ ${c.valor.toLocaleString("pt-BR")}`,
-      `R$ ${(c.valor / c.area).toFixed(2)}`,
-      c.link
-    ]),
-    styles: { fontSize: 10, cellWidth: "wrap" },
-    columnStyles: { 4: { cellWidth: 70 } },
-  });
+  doc.setFont(undefined, "bold");
+  doc.text(`Valor da Proposta: R$ ${parseFloat(valor).toLocaleString("pt-BR")}`, 20, y);
+  y += 15;
 
-  const media = comparativos.reduce((sum, c) => sum + c.valor, 0) / comparativos.length;
-  doc.setFontSize(14);
-  doc.setTextColor(0, 102, 0);
-  doc.text(`Valor médio estimado: R$ ${media.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`, 14, doc.lastAutoTable.finalY + 10);
+  doc.setFont(undefined, "bold");
+  doc.text("Condições de Pagamento:", 20, y);
+  doc.setFont(undefined, "normal");
+  y += 8;
+  const condicoesLines = doc.splitTextToSize(condicoes, 170);
+  doc.text(condicoesLines, 20, y);
+  y += condicoesLines.length * 7 + 10;
 
+  // Espaço para assinatura
+  doc.setFont(undefined, "bold");
+  doc.text("Assinaturas:", 20, y);
+  y += 20;
+  doc.line(20, y, 90, y); doc.text("Comprador", 20, y + 6);
+  doc.line(120, y, 190, y); doc.text("Vendedor", 120, y + 6);
+
+  // Finaliza
   const pdf = doc.output("arraybuffer");
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=proposta_house55.pdf");
