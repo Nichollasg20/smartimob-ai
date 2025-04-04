@@ -3,308 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartImob.AI - Avaliador de Imóveis</title>
+  <title>Gerador de Propostas - House55</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-      margin: 0;
-      padding: 0;
+      background-color: #f7f7f7;
+      padding: 20px;
     }
     .container {
       max-width: 700px;
-      margin: 40px auto;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      padding: 40px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
     }
     h2 {
-      text-align: center;
       color: #a97d36;
-      font-size: 28px;
-      margin-bottom: 30px;
+      text-align: center;
     }
     label {
       font-weight: bold;
-      margin-top: 20px;
       display: block;
+      margin-top: 20px;
     }
-    input, select, textarea {
+    input, textarea {
       width: 100%;
-      padding: 12px;
-      margin-top: 8px;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
     }
     button {
-      width: 100%;
-      padding: 15px;
       background-color: #a97d36;
       color: white;
       border: none;
-      border-radius: 8px;
+      padding: 15px;
       font-size: 16px;
-      font-weight: bold;
       margin-top: 30px;
+      border-radius: 8px;
       cursor: pointer;
+      width: 100%;
     }
     button:hover {
       background-color: #916b2e;
-    }
-    #resultado, #comparativos {
-      background-color: #f9f9f9;
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 5px solid #c59d5f;
-      font-size: 15px;
-      white-space: pre-wrap;
-    }
-    #comparativos {
-      display: none;
-    }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    th {
-      background-color: #eee;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🏡 Avaliador de Imóveis com IA</h2>
-    <form id="formImovel">
-      <label for="endereco">Endereço completo:</label>
-      <input type="text" id="endereco" required />
+    <h2>📄 Gerador de Propostas - House55</h2>
+    <form id="propostaForm">
+      <label for="nomeCorretor">Nome do Corretor:</label>
+      <input type="text" id="nomeCorretor" required />
 
-      <label for="tipo">Tipo de Imóvel:</label>
-      <select id="tipo" required>
-        <option>Selecione uma opção</option>
-        <optgroup label="Apartamentos">
-          <option>Apartamento</option>
-          <option>Flat</option>
-          <option>Cobertura</option>
-          <option>Kitinet</option>
-          <option>Loft</option>
-          <option>Studio</option>
-        </optgroup>
-        <optgroup label="Residencias">
-          <option>Casa de Condomínio</option>
-          <option>Casa Residencial</option>
-          <option>Sobrado</option>
-        </optgroup>
-        <optgroup label="Rural">
-          <option>Chácara</option>
-        </optgroup>
-        <optgroup label="Lotes e Terrenos">
-          <option>Terreno</option>
-        </optgroup>
-        <optgroup label="Comercial">
-          <option>Loja</option>
-          <option>Prédio Comercial</option>
-          <option>Residência Comercial</option>
-          <option>Sala Comercial</option>
-        </optgroup>
-        <optgroup label="Industrial">
-          <option>Galpão</option>
-        </optgroup>
-      </select>
+      <label for="nomeComprador">Nome do Comprador:</label>
+      <input type="text" id="nomeComprador" required />
 
-      <label for="area">Área útil (m²):</label>
-      <input type="number" id="area" required />
+      <label for="nomeVendedor">Nome do Vendedor:</label>
+      <input type="text" id="nomeVendedor" required />
 
-      <label for="quartos">Quartos:</label>
-      <input type="number" id="quartos" required />
+      <label for="descricaoImovel">Descrição do Imóvel:</label>
+      <textarea id="descricaoImovel" rows="4" required></textarea>
 
-      <label for="banheiros">Banheiros:</label>
-      <input type="number" id="banheiros" required />
+      <label for="valorProposta">Valor da Proposta (R$):</label>
+      <input type="number" id="valorProposta" required />
 
-      <label for="vagas">Vagas de garagem:</label>
-      <input type="number" id="vagas" required />
+      <label for="condicoes">Condições de Pagamento:</label>
+      <textarea id="condicoes" rows="3" required></textarea>
 
-      <label for="estado">Estado do imóvel:</label>
-      <select id="estado">
-        <option>Novo</option>
-        <option>Usado</option>
-        <option>Reformado</option>
-      </select>
-
-      <label for="observacoes">Observações extras:</label>
-      <textarea id="observacoes"></textarea>
-
-      <button type="submit">🔍 Avaliar Imóvel</button>
+      <button type="submit">📤 Gerar Proposta PDF</button>
     </form>
-
-    <div id="resultado"></div>
-
-    <div id="comparativos">
-      <h3>🔎 Imóveis semelhantes</h3>
-      <form id="comparativoForm">
-        <table id="tabelaComparativos">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Área (m²)</th>
-              <th>Valor (R$)</th>
-              <th>Link</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <button type="button" onclick="calcularMedia()">📊 Calcular média estimada</button>
-      </form>
-      <div id="mediaCalculada" style="margin-top: 20px; font-weight: bold;"></div>
-      <div style="text-align: center; margin-top: 20px;">
-        <button type="button" onclick="gerarProposta()">📄 Gerar Proposta</button>
-      </div>
-    </div>
   </div>
 
   <script>
-    const form = document.getElementById("formImovel");
-    const resultadoBox = document.getElementById("resultado");
-    const comparativosBox = document.getElementById("comparativos");
-    const tabelaComparativos = document.getElementById("tabelaComparativos").querySelector("tbody");
-
-    form.onsubmit = async (e) => {
+    document.getElementById('propostaForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      resultadoBox.innerHTML = "Analisando com IA... ⏳";
-      comparativosBox.style.display = "none";
 
-      const prompt = `
-        Avalie um imóvel com os seguintes dados:
-        Endereço: ${document.getElementById("endereco").value},
-        Tipo de imóvel: ${document.getElementById("tipo").value},
-        Área útil: ${document.getElementById("area").value} m²,
-        Quartos: ${document.getElementById("quartos").value},
-        Banheiros: ${document.getElementById("banheiros").value},
-        Vagas de garagem: ${document.getElementById("vagas").value},
-        Estado: ${document.getElementById("estado").value},
-        Observações: ${document.getElementById("observacoes").value}.
-        Forneça uma avaliação estimada e explique os motivos.
-      `;
-
-      try {
-        const response = await fetch("/api/avaliador", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
-        });
-
-        const result = await response.json();
-        const texto = result.choices?.[0]?.message?.content;
-        if (texto) {
-          resultadoBox.innerHTML = `<strong>📊 Avaliação da IA:</strong><br><br>${texto.replace(/\n/g, "<br>")}`;
-          await buscarImoveisSemelhantes();
-        } else {
-          resultadoBox.innerHTML = "❌ Erro: resposta vazia da IA.";
-        }
-      } catch (err) {
-        resultadoBox.innerHTML = "❌ Erro ao conectar com a IA.";
-      }
-    };
-
-    async function buscarImoveisSemelhantes() {
-      try {
-        const res = await fetch("/api/buscarImoveis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            endereco: document.getElementById("endereco").value,
-            tipo: document.getElementById("tipo").value,
-            area: document.getElementById("area").value,
-            quartos: document.getElementById("quartos").value
-          })
-        });
-
-        const dados = await res.json();
-        tabelaComparativos.innerHTML = "";
-        dados.forEach((item, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><input type="checkbox" value="${item.valor}" name="comparativo" /></td>
-            <td>${item.area}</td>
-            <td>R$ ${parseFloat(item.valor).toLocaleString('pt-BR')}</td>
-            <td><a href="${item.link}" target="_blank">Ver anúncio</a></td>
-          `;
-          tabelaComparativos.appendChild(tr);
-        });
-        comparativosBox.style.display = "block";
-      } catch (e) {
-        console.error("Erro ao buscar imóveis:", e);
-      }
-    }
-
-    function calcularMedia() {
-      const selecionados = document.querySelectorAll("input[name='comparativo']:checked");
-      if (selecionados.length === 0) {
-        document.getElementById("mediaCalculada").innerText = "Por favor, selecione pelo menos um imóvel.";
-        return;
-      }
-      let soma = 0;
-      selecionados.forEach(el => soma += parseInt(el.value));
-      const media = soma / selecionados.length;
-      document.getElementById("mediaCalculada").innerText = `⭐ Valor médio estimado com base na seleção: R$ ${media.toLocaleString('pt-BR')}`;
-    }
-
-    async function gerarProposta() {
-      const selecionados = document.querySelectorAll("input[name='comparativo']:checked");
-      if (selecionados.length === 0) {
-        alert("Por favor, selecione pelo menos um imóvel para gerar a proposta.");
-        return;
-      }
-
-      const comparativos = [];
-      selecionados.forEach(checkbox => {
-        const row = checkbox.closest("tr");
-        comparativos.push({
-          area: parseFloat(row.children[1].innerText),
-          valor: parseFloat(row.children[2].innerText.replace("R$", "").replace(/\./g, "").replace(",", ".")),
-          link: row.children[3].querySelector("a").href
-        });
-      });
-
-      const imovel = {
-        endereco: document.getElementById("endereco").value,
-        tipo: document.getElementById("tipo").value,
-        area: document.getElementById("area").value,
-        quartos: document.getElementById("quartos").value,
-        banheiros: document.getElementById("banheiros").value,
-        vagas: document.getElementById("vagas").value,
-        estado: document.getElementById("estado").value,
-        observacoes: document.getElementById("observacoes").value
+      const dados = {
+        corretor: document.getElementById('nomeCorretor').value,
+        comprador: document.getElementById('nomeComprador').value,
+        vendedor: document.getElementById('nomeVendedor').value,
+        imovel: document.getElementById('descricaoImovel').value,
+        valor: document.getElementById('valorProposta').value,
+        condicoes: document.getElementById('condicoes').value
       };
 
-      try {
-        const response = await fetch("/api/gerarPdf", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imovel, comparativos })
-        });
+      const res = await fetch('/api/gerarProposta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "proposta_house55.pdf";
-        a.click();
-        window.URL.revokeObjectURL(url);
-      } catch (err) {
-        alert("Erro ao gerar o PDF.");
-        console.error(err);
-      }
-    }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'proposta_house55.pdf';
+      a.click();
+    });
   </script>
 </body>
 </html>
