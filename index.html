@@ -7,101 +7,125 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
+      background: #f8f8f8;
+      margin: 0;
       padding: 20px;
     }
+
     .container {
       max-width: 700px;
       margin: auto;
-      background: white;
+      background: #fff;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
+
     h2 {
-      color: #a97d36;
       text-align: center;
+      color: #a97d36;
+      margin-bottom: 20px;
     }
+
     label {
-      font-weight: bold;
       display: block;
-      margin-top: 20px;
+      margin-top: 15px;
+      font-weight: bold;
     }
-    input, textarea {
+
+    input, textarea, select {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
+      margin-top: 6px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
+
     button {
       background-color: #a97d36;
       color: white;
+      padding: 14px;
       border: none;
-      padding: 15px;
-      font-size: 16px;
-      margin-top: 30px;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 16px;
+      margin-top: 25px;
       width: 100%;
     }
+
     button:hover {
       background-color: #916b2e;
+    }
+
+    .logo {
+      display: block;
+      margin: auto;
+      width: 160px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📄 Gerador de Propostas - House55</h2>
-    <form id="propostaForm">
-      <label for="nomeCorretor">Nome do Corretor:</label>
-      <input type="text" id="nomeCorretor" required />
+    <img src="https://i.imgur.com/YY4M4YM.png" alt="Logo House55" class="logo" />
+    <h2>Gerador de Propostas - House55</h2>
 
-      <label for="nomeComprador">Nome do Comprador:</label>
-      <input type="text" id="nomeComprador" required />
+    <form id="formProposta">
+      <label>Nome do Corretor:</label>
+      <input type="text" id="corretor" required />
 
-      <label for="nomeVendedor">Nome do Vendedor:</label>
-      <input type="text" id="nomeVendedor" required />
+      <label>Nome do Comprador:</label>
+      <input type="text" id="comprador" required />
 
-      <label for="descricaoImovel">Descrição do Imóvel:</label>
-      <textarea id="descricaoImovel" rows="4" required></textarea>
+      <label>Nome do Vendedor:</label>
+      <input type="text" id="vendedor" required />
 
-      <label for="valorProposta">Valor da Proposta (R$):</label>
-      <input type="number" id="valorProposta" required />
+      <label>Endereço do Imóvel:</label>
+      <input type="text" id="endereco" required />
 
-      <label for="condicoes">Condições de Pagamento:</label>
-      <textarea id="condicoes" rows="3" required></textarea>
+      <label>Valor de Venda (R$):</label>
+      <input type="number" id="valor" required />
 
-      <button type="submit">📤 Gerar Proposta PDF</button>
+      <label>Forma de Pagamento:</label>
+      <input type="text" id="pagamento" required />
+
+      <label>Observações:</label>
+      <textarea id="observacoes"></textarea>
+
+      <button type="submit">📄 Gerar Proposta</button>
     </form>
   </div>
 
   <script>
-    document.getElementById('propostaForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('formProposta');
+
+    form.onsubmit = async (e) => {
       e.preventDefault();
 
       const dados = {
-        corretor: document.getElementById('nomeCorretor').value,
-        comprador: document.getElementById('nomeComprador').value,
-        vendedor: document.getElementById('nomeVendedor').value,
-        imovel: document.getElementById('descricaoImovel').value,
-        valor: document.getElementById('valorProposta').value,
-        condicoes: document.getElementById('condicoes').value
+        corretor: document.getElementById('corretor').value,
+        comprador: document.getElementById('comprador').value,
+        vendedor: document.getElementById('vendedor').value,
+        endereco: document.getElementById('endereco').value,
+        valor: document.getElementById('valor').value,
+        pagamento: document.getElementById('pagamento').value,
+        observacoes: document.getElementById('observacoes').value,
       };
 
-      const res = await fetch('/api/gerarProposta', {
+      const response = await fetch('/api/gerarProposta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
       });
 
-      const blob = await res.blob();
+      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = 'proposta_house55.pdf';
       a.click();
-    });
+    };
   </script>
 </body>
 </html>
