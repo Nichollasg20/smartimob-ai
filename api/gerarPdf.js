@@ -1,6 +1,4 @@
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,13 +22,7 @@ export default async function handler(req, res) {
       res.end(pdfData);
     });
 
-    // Logo
-    const logoPath = path.join(process.cwd(), 'public', 'logo_house.png');
-    if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, 50, 30, { width: 120 });
-    }
-
-    doc.fontSize(18).fillColor('#000').text('Proposta de Compra - House55', 200, 40, { align: 'right' });
+    doc.fontSize(18).fillColor('#000').text('Proposta de Compra - House55', { align: 'center' });
 
     doc.moveDown(2);
     doc.fontSize(12).text(`🧑 Comprador: ${comprador}`);
