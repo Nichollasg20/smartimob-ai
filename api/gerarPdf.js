@@ -9,21 +9,13 @@ export default async function handler(req, res) {
 
   const doc = new jsPDF();
 
-  // Logo da House55 (use a URL da logo como base)
-  const logoURL = "https://i.imgur.com/YY4M4YM.png";
-  const logoBase64 = await fetch(logoURL).then(res => res.arrayBuffer()).then(buf => {
-    return Buffer.from(buf).toString('base64');
-  });
-
-  doc.addImage(`data:image/png;base64,${logoBase64}`, "PNG", 15, 10, 40, 20);
-
   doc.setFontSize(18);
   doc.setTextColor(160, 118, 40);
-  doc.text("Proposta de Compra de Imóvel", 105, 30, { align: "center" });
+  doc.text("Proposta de Compra de Imóvel - House55", 105, 20, { align: "center" });
 
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
-  let y = 50;
+  let y = 40;
 
   doc.text(`🧑 Corretor: ${corretor}`, 15, y);
   y += 10;
@@ -45,7 +37,6 @@ export default async function handler(req, res) {
     doc.text(splitText, 15, y);
   }
 
-  // Final
   y += 30;
   doc.setFontSize(10);
   doc.text("Esta proposta não substitui o contrato definitivo de compra e venda.", 15, y);
