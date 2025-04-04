@@ -1,58 +1,57 @@
 import { jsPDF } from "jspdf";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") {
+    return res.status(405).end();
+  }
 
-  const { corretor, comprador, vendedor, imovel, valor, condicoes } = req.body;
+  const { corretor, comprador, vendedor, endereco, valor, pagamento, observacoes } = req.body;
 
   const doc = new jsPDF();
-  doc.setFont("helvetica", "normal");
 
-  // Título
+  // Logo da House55 (use a URL da logo como base)
+  const logoURL = "https://i.imgur.com/YY4M4YM.png";
+  const logoBase64 = await fetch(logoURL).then(res => res.arrayBuffer()).then(buf => {
+    return Buffer.from(buf).toString('base64');
+  });
+
+  doc.addImage(`data:image/png;base64,${logoBase64}`, "PNG", 15, 10, 40, 20);
+
   doc.setFontSize(18);
-  doc.setTextColor(169, 125, 54);
-  doc.text("Proposta de Compra - House55", 105, 20, { align: "center" });
+  doc.setTextColor(160, 118, 40);
+  doc.text("Proposta de Compra de Imóvel", 105, 30, { align: "center" });
 
-  // Dados principais
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
-  let y = 35;
+  let y = 50;
 
-  doc.text(`Corretor: ${corretor}`, 20, y);
+  doc.text(`🧑 Corretor: ${corretor}`, 15, y);
   y += 10;
-  doc.text(`Comprador: ${comprador}`, 20, y);
+  doc.text(`🏠 Vendedor: ${vendedor}`, 15, y);
   y += 10;
-  doc.text(`Vendedor: ${vendedor}`, 20, y);
-  y += 15;
+  doc.text(`🛒 Comprador: ${comprador}`, 15, y);
+  y += 10;
+  doc.text(`📍 Endereço do Imóvel: ${endereco}`, 15, y);
+  y += 10;
+  doc.text(`💰 Valor da Proposta: R$ ${parseFloat(valor).toLocaleString('pt-BR')}`, 15, y);
+  y += 10;
+  doc.text(`💳 Forma de Pagamento: ${pagamento}`, 15, y);
+  y += 10;
 
-  doc.setFont(undefined, "bold");
-  doc.text("Descrição do Imóvel:", 20, y);
-  doc.setFont(undefined, "normal");
-  y += 8;
-  const imovelLines = doc.splitTextToSize(imovel, 170);
-  doc.text(imovelLines, 20, y);
-  y += imovelLines.length * 7;
+  if (observacoes && observacoes.trim() !== "") {
+    doc.text("📝 Observações:", 15, y);
+    y += 8;
+    const splitText = doc.splitTextToSize(observacoes, 180);
+    doc.text(splitText, 15, y);
+  }
 
-  doc.setFont(undefined, "bold");
-  doc.text(`Valor da Proposta: R$ ${parseFloat(valor).toLocaleString("pt-BR")}`, 20, y);
-  y += 15;
+  // Final
+  y += 30;
+  doc.setFontSize(10);
+  doc.text("Esta proposta não substitui o contrato definitivo de compra e venda.", 15, y);
+  y += 10;
+  doc.text("Data: " + new Date().toLocaleDateString("pt-BR"), 15, y);
 
-  doc.setFont(undefined, "bold");
-  doc.text("Condições de Pagamento:", 20, y);
-  doc.setFont(undefined, "normal");
-  y += 8;
-  const condicoesLines = doc.splitTextToSize(condicoes, 170);
-  doc.text(condicoesLines, 20, y);
-  y += condicoesLines.length * 7 + 10;
-
-  // Espaço para assinatura
-  doc.setFont(undefined, "bold");
-  doc.text("Assinaturas:", 20, y);
-  y += 20;
-  doc.line(20, y, 90, y); doc.text("Comprador", 20, y + 6);
-  doc.line(120, y, 190, y); doc.text("Vendedor", 120, y + 6);
-
-  // Finaliza
   const pdf = doc.output("arraybuffer");
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=proposta_house55.pdf");
